@@ -22,6 +22,7 @@ Create a folder named **`spark-setup`** at any location on your system and set u
 ├── docker-compose.yml
 
 ├── jupyter/
+       
        └── Dockerfile
        
 ├── notebooks/
@@ -29,6 +30,7 @@ Create a folder named **`spark-setup`** at any location on your system and set u
 ├──event-logs/
 
 ├──spark-conf/
+       
        └── spark-defaults.conf
 
 

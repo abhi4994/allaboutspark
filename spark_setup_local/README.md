@@ -20,12 +20,14 @@ This guide helps you set up **Apache Spark** locally using **Docker Compose** an
 Create a folder named **`spark-setup`** at any location on your system and set up the following directory structure:
 
 ├── docker-compose.yml
+
 ├── jupyter/
        └── Dockerfile
+       
 ├── notebooks/
-├── data/
-       └── orders.csv
+       
 ├──event-logs/
+
 ├──spark-conf/
        └── spark-defaults.conf
 

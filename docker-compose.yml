@@ -1,0 +1,111 @@
+version: "3.8"
+
+services:
+
+  spark-master:
+    image: apache/spark:3.5.1
+    container_name: spark-master
+    user: root
+    command: >
+      bash -c "
+      /opt/spark/sbin/start-master.sh &&
+      tail -f /dev/null
+      "
+    environment:
+      SPARK_NO_DAEMONIZE: "1"
+      SPARK_MASTER_PORT: 7077
+      SPARK_MASTER_WEBUI_PORT: 8080
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/events -Dspark.history.ui.port=18080"
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+      #- "4040:4040" ## need for spark-submit only 
+    volumes:
+      - ./data:/data
+      - ./event-logs:/opt/spark/events
+      - ./spark-conf:/opt/spark/conf
+
+  spark-worker-1:
+    image: apache/spark:3.5.1
+    container_name: spark-worker-1
+    user: root
+    depends_on:
+      - spark-master
+    command: >
+      bash -c "
+      /opt/spark/sbin/start-worker.sh spark://spark-master:7077 &&
+      tail -f /dev/null
+      "
+    mem_limit: 2g
+    memswap_limit: 2g
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+      SPARK_NO_DAEMONIZE: "1"
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./data:/data
+      - ./event-logs:/opt/spark/events
+      - ./spark-conf:/opt/spark/conf
+
+  spark-worker-2:
+    image: apache/spark:3.5.1
+    container_name: spark-worker-2
+    user: root
+    depends_on:
+      - spark-master
+    command: >
+      bash -c "
+      /opt/spark/sbin/start-worker.sh spark://spark-master:7077 &&
+      tail -f /dev/null
+      "
+    mem_limit: 2g
+    memswap_limit: 2g  
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 2g
+      SPARK_NO_DAEMONIZE: "1"
+    ports:
+      - "8082:8081"
+    volumes:
+      - ./data:/data
+      - ./event-logs:/opt/spark/events
+      - ./spark-conf:/opt/spark/conf
+
+  spark-history-server:
+    image: apache/spark:3.5.1
+    container_name: spark-history-server
+    user: root
+    command: >
+      bash -c "
+      /opt/spark/sbin/start-history-server.sh &&
+      tail -f /dev/null
+      "
+    environment:
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/events -Dspark.history.ui.port=18080"
+    ports:
+      - "18080:18080"
+    volumes:
+      - ./event-logs:/opt/spark/events
+      - ./spark-conf:/opt/spark/conf
+
+  jupyter:
+    build: ./jupyter
+    container_name: jupyter
+    user: root
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+    depends_on:
+      - spark-master
+    mem_limit: 2g
+    memswap_limit: 2g  
+    environment:
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_CONF_DIR: /opt/spark/conf
+    volumes:
+      - ./notebooks:/workspace
+      - ./data:/data
+      - ./event-logs:/opt/spark/events
+      - ./spark-conf:/opt/spark/conf

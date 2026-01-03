@@ -77,8 +77,8 @@ Create or open a notebook.
 Run the following PySpark code:
 
 """
+    
     from pyspark.sql import SparkSession
-
     spark = (
         SparkSession.builder
         .master("spark://spark-master:7077")
